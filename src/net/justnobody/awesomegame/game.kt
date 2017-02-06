@@ -25,13 +25,7 @@ class GameApp : Application() {
     val root = Group()
     val scene = Scene(root)
 
-    scene.onKeyPressed = EventHandler<KeyEvent> {
-      when (it.code) {
-        KeyCode.ESCAPE -> window.close()
-        else -> game.handleKeyPress(it)
-      }
-    }
-
+    scene.onKeyPressed = EventHandler<KeyEvent> { game.handleKeyPress(it) }
     scene.onKeyReleased = EventHandler<KeyEvent> { game.handleKeyRelease(it) }
 
     val canvas = Canvas(SCREEN_WIDTH, SCREEN_HEIGHT)

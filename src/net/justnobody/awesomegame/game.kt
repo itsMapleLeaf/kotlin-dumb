@@ -18,33 +18,31 @@ const val GAME_TITLE = "awesome game"
 
 val BACKGROUND_COLOR = Color(0.2, 0.2, 0.3, 1.0)
 
-class Game {
-  val player = Player()
+class GameApp : Application() {
+  override fun start(window: Stage) {
+    val game = Game(window)
 
-  fun update(dt: Double) {
-    player.update(dt)
-  }
+    val root = Group()
+    val scene = Scene(root)
 
-  fun draw(gc: GraphicsContext) {
-    gc.fill = BACKGROUND_COLOR
-    gc.fillRect(0.0, 0.0, SCREEN_WIDTH, SCREEN_HEIGHT)
-    player.draw(gc)
-  }
-
-  fun handleKeyPress(event: KeyEvent) {
-    when (event.code) {
-      KeyCode.LEFT, KeyCode.A -> player.movingLeft = true
-      KeyCode.RIGHT, KeyCode.D -> player.movingRight = true
-      else -> {}
+    scene.onKeyPressed = EventHandler<KeyEvent> {
+      when (it.code) {
+        KeyCode.ESCAPE -> window.close()
+        else -> game.handleKeyPress(it)
+      }
     }
-  }
 
-  fun handleKeyRelease(event: KeyEvent) {
-    when (event.code) {
-      KeyCode.LEFT, KeyCode.A -> player.movingLeft = false
-      KeyCode.RIGHT, KeyCode.D -> player.movingRight = false
-      else -> {}
-    }
+    scene.onKeyReleased = EventHandler<KeyEvent> { game.handleKeyRelease(it) }
+
+    val canvas = Canvas(SCREEN_WIDTH, SCREEN_HEIGHT)
+    root.children.add(canvas)
+
+    val timer = GameTimer(game, canvas.graphicsContext2D)
+    timer.start()
+
+    window.title = GAME_TITLE
+    window.scene = scene
+    window.show()
   }
 }
 
@@ -59,30 +57,33 @@ class GameTimer(val game: Game, val gc: GraphicsContext) : AnimationTimer() {
   }
 }
 
-class GameApp : Application() {
-  override fun start(stage: Stage) {
-    val game = Game()
+class Game(val window: Stage) {
+  val player = Player()
 
-    val root = Group()
-    val scene = Scene(root)
+  fun update(dt: Double) {
+    player.update(dt)
+  }
 
-    scene.onKeyPressed = EventHandler<KeyEvent> {
-      when (it.code) {
-        KeyCode.ESCAPE -> stage.close()
-        else -> game.handleKeyPress(it)
-      }
+  fun draw(gc: GraphicsContext) {
+    gc.fill = BACKGROUND_COLOR
+    gc.fillRect(0.0, 0.0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    player.draw(gc)
+  }
+
+  fun handleKeyPress(event: KeyEvent) {
+    when (event.code) {
+      KeyCode.ESCAPE -> window.close()
+      KeyCode.LEFT, KeyCode.A -> player.movingLeft = true
+      KeyCode.RIGHT, KeyCode.D -> player.movingRight = true
+      else -> {}
     }
+  }
 
-    scene.onKeyReleased = EventHandler<KeyEvent> { game.handleKeyRelease(it) }
-
-    val canvas = Canvas(SCREEN_WIDTH, SCREEN_HEIGHT)
-    root.children.add(canvas)
-
-    val timer = GameTimer(game, canvas.graphicsContext2D)
-    timer.start()
-
-    stage.title = GAME_TITLE
-    stage.scene = scene
-    stage.show()
+  fun handleKeyRelease(event: KeyEvent) {
+    when (event.code) {
+      KeyCode.LEFT, KeyCode.A -> player.movingLeft = false
+      KeyCode.RIGHT, KeyCode.D -> player.movingRight = false
+      else -> {}
+    }
   }
 }
